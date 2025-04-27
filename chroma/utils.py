@@ -30,7 +30,7 @@ class ChromaUtils:
         self.async_chroma_client = await chromadb.AsyncHttpClient()
 
     def sync_create_coll(self, collection_name: str) -> None:
-        if self.sync_check_if_coll_exists(collection_name=collection_name) and collection_name not in self.sync_collection_list:
+        if collection_name not in self.sync_collection_list:
             self.sync_collection_list.update({collection_name: self.sync_chroma_client.get_or_create_collection(name=collection_name)})
 
     def sync_add_vectors(self, collection_name: str, doc_list: List[str], id_list: List[str]) -> None:
@@ -68,8 +68,7 @@ class ChromaUtils:
         return col_exists
 
     async def async_create_coll(self, collection_name: str) -> None:
-        check = await self.async_check_if_coll_exists(collection_name=collection_name)
-        if check and collection_name not in self.async_collection_list:
+        if collection_name not in self.async_collection_list:
             collection = await self.async_chroma_client.get_or_create_collection(name=collection_name)
             self.async_collection_list.update({collection_name: collection})
 

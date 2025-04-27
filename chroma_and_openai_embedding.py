@@ -1,37 +1,38 @@
-import os
-
-import chromadb
-from dotenv import load_dotenv
-
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-
-# Load documents from a web page
-loader = WebBaseLoader("https://docs.smith.langchain.com/user_guide")
-docs = loader.load()
-#document_text = " ".join([doc.page_content for doc in docs])
+from chroma.utils import ChromaUtils
 
 
+def main():
+
+    # Load documents from a web page
+    loader = WebBaseLoader("https://it.wikipedia.org/wiki/FantaSanremo")
+    docs = loader.load()
+    #document_text = " ".join([doc.page_content for doc in docs])
 
 
-# Creating embedding and splitter
-text_splitter = RecursiveCharacterTextSplitter()
-documents = text_splitter.split_documents(docs)
-documents_text = [doc.page_content for doc in documents]
+    # Creating embedding and splitter
+    text_splitter = RecursiveCharacterTextSplitter(separators=["\n\n", "\n", " ", "", "\n\n\n\n\n\n\n"])
+    documents = text_splitter.split_documents(docs)
+    documents_text = [doc.page_content for doc in documents]
 
-ids = ["id" + str(i) for i in range(len(documents))]
+    ids = ["id" + str(i) for i in range(len(documents))]
 
-chroma_client = chromadb.Client()
-collection = chroma_client.create_collection(name="first_collection")
-collection.add(
-    documents=documents_text,
-    ids=ids
-)
+    chroma_client = ChromaUtils()
+    chroma_client.sync_create_coll(collection_name="first_collection")
+    chroma_client.sync_add_vectors(
+        collection_name="first_collection",
+        doc_list=documents_text,
+        id_list=ids
+    )
 
-results = collection.query(
-    query_texts=["This is a query document about florida"], # Chroma will embed this for you
-    n_results=2 # how many results to return
-)
-print(results)
+    results = chroma_client.sync_query_collection(
+        collection_name="first_collection",
+        query = "Who won the first sanremo?"
+    )
+    print(results)
 
+
+if __name__ == "__main__":
+    main()

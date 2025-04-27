@@ -4,3 +4,4 @@ chromadb == 1.0.7
 langchain-community~=0.3.22
 langchain-core~=0.3.56
 langchain-text-splitters~=0.3.8
+beautifulsoup4~=4.13.4
