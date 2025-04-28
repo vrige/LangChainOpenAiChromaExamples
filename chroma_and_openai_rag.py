@@ -1,10 +1,8 @@
 from flask import Flask, jsonify, request
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sympy import content
 
 from chroma.utils import ChromaUtils
-from models.state import State
 from openai_utils.openai_utils import OpenaiAgent
 
 chroma_client = ChromaUtils()
