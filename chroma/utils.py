@@ -1,4 +1,5 @@
-from typing import Dict, List, Any
+import uuid
+from typing import Dict, List, Any, Optional
 
 import chromadb
 import asyncio
@@ -33,7 +34,10 @@ class ChromaUtils:
         if collection_name not in self.sync_collection_list:
             self.sync_collection_list.update({collection_name: self.sync_chroma_client.get_or_create_collection(name=collection_name)})
 
-    def sync_add_vectors(self, collection_name: str, doc_list: List[str], id_list: List[str]) -> None:
+    def sync_add_vectors(self, collection_name: str, doc_list: List[str], id_list: Optional[List[str]] = None) -> List[str]:
+        if not id_list:
+            id_list = [str(uuid.uuid4()) for i in doc_list]
+
         if collection_name not in self.sync_collection_list.keys():
             self.sync_create_coll(collection_name=collection_name)
         if collection_name in self.sync_collection_list.keys():
@@ -42,15 +46,16 @@ class ChromaUtils:
                 documents=doc_list,
                 ids=id_list
             )
+        return id_list
 
-    def sync_query_collection(self, collection_name: str, query: str) -> Dict[str, Any]:
+    def sync_query_collection(self, collection_name: str, query: str, n_results: int = 4) -> Dict[str, Any]:
         if collection_name not in self.sync_collection_list.keys():
             self.sync_create_coll(collection_name=collection_name)
         if collection_name in self.sync_collection_list.keys():
             collection = self.sync_collection_list[collection_name]
             results = collection.query(
                 query_texts=[query],
-                n_results=2
+                n_results=n_results
             )
             print(results)
             return results
@@ -72,7 +77,10 @@ class ChromaUtils:
             collection = await self.async_chroma_client.get_or_create_collection(name=collection_name)
             self.async_collection_list.update({collection_name: collection})
 
-    async def async_add_vectors(self, collection_name: str, doc_list: List[str], id_list: List[str]) -> None:
+    async def async_add_vectors(self, collection_name: str, doc_list: List[str], id_list: Optional[List[str]] = None) -> List[str]:
+        if not id_list:
+            id_list = [uuid.uuid4() for i in doc_list]
+
         if collection_name not in self.async_collection_list.keys():
             await self.async_create_coll(collection_name=collection_name)
         elif collection_name in self.async_collection_list.keys():
@@ -81,6 +89,7 @@ class ChromaUtils:
                 documents=doc_list,
                 ids=id_list
             )
+        return id_list
 
     async def async_query_collection(self, collection_name: str, query: str):
         if collection_name not in self.async_collection_list.keys():

@@ -1,5 +1,5 @@
 from langchain_community.document_loaders import WebBaseLoader
-from openai import OpenAI
+from openai_utils import OpenAI
 
 OPENAI_API_KEY = "..."
 
